@@ -1,17 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
 
-
-__global__ void add(float* x, float * y, float* z, int n)
-{
+__global__ void add(float* x, float* y, float* z, int n) {
     int index = threadIdx.x + blockIdx.x * blockDim.x;
     // int stride = blockDim.x * gridDim.x;
     // printf("index:%d, stride:%d\n", index, stride);
     z[index] = x[index] + y[index];
 }
 
-int main()
-{
+int main() {
     int N = 16;
     int nBytes = N * sizeof(float);
     float *x, *y, *z;
@@ -19,8 +18,7 @@ int main()
     y = (float*)malloc(nBytes);
     z = (float*)malloc(nBytes);
 
-    for (int i = 0; i < N; ++i)
-    {
+    for (int i = 0; i < N; ++i) {
         x[i] = 10.0 * i;
         y[i] = 20.0 * i;
     }
@@ -38,15 +36,14 @@ int main()
     dim3 blockSize(N);
     dim3 gridSize((N + blockSize.x - 1) / blockSize.x);
     // 执行kernel
-    add <<< gridSize, blockSize >>> (d_x, d_y, d_z, N);
+    add<<<gridSize, blockSize>>>(d_x, d_y, d_z, N);
 
     // 将device得到的结果拷贝到host
     cudaMemcpy((void*)z, (void*)d_z, nBytes, cudaMemcpyDeviceToHost);
-    for(int i = 0; i < N;i ++){
+    for (int i = 0; i < N; i++) {
         printf("%f ", z[i]);
     }
     printf("\n");
-
 
     // 释放device内存
     cudaFree(d_x);
