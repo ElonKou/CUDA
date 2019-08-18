@@ -6,49 +6,9 @@
 *  Date     : 2019年08月17日 星期六 17时43分21秒
 ================================================================*/
 
-#include <stdio.h>
-#include <iostream>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#define CUDA_W 16
-#define CUDA_H 16
-
-// __global__ void vector_add_int(int *A, int *B, int *C, int N) {
-//     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (idx < N) {
-//         C[idx] = A[idx] + B[idx];
-//     }
-// }
-// __global__ void vector_add_float(float *A, float *B, float *C, int N) {
-//     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (idx < N) {
-//         C[idx] = A[idx] + B[idx];
-//     }
-// }
-// __global__ void vector_add_double(double *A, double *B, double *C, int N) {
-//     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (idx < N) {
-//         C[idx] = A[idx] + B[idx];
-//     }
-// }
-// __global__ void vector_add_int_int(int *A, int C, int N) {
-//     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (idx < N) {
-//         A[idx] += C;
-//     }
-// }
-// __global__ void vector_add_float_float(float *A, float C, int N) {
-//     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (idx < N) {
-//         A[idx] += C;
-//     }
-// }
-// __global__ void vector_add_double_double(double *A, double C, int N) {
-//     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (idx < N) {
-//         A[idx] += C;
-//     }
-// }
+#include "vector.hh"
 
 #define PREFIX __global__ void
 #define VECTOR_ADD(TYPE)                                                  \
