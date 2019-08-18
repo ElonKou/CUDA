@@ -1,6 +1,6 @@
 /*================================================================
 *  Copyright (C)2019 All rights reserved.
-*  FileName : vector.cu
+*  FileName : biu_vector.cu
 *  Author   : ElonKou
 *  Email    : elonkou@ktime.cc
 *  Date     : 2019年08月17日 星期六 17时43分21秒
@@ -8,7 +8,7 @@
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include "vector.hh"
+#include "biu.hh"
 
 #define PREFIX __global__ void
 #define VECTOR_ADD(TYPE)                                                  \

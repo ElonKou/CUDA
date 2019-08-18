@@ -1,9 +1,9 @@
-EXEC= vector
+EXEC= biu
 COMMON= -I/usr/local/cuda/include
 LDFLAGS= -L/usr/local/cuda/lib64 -lcuda -lcudart
-EXECOBJ= vector.o vector_cuda.o
-SLIB= libvector.so
-SCU= vector_cuda.cu
+EXECOBJ= biu_vector.o biu_test.o
+SLIB= libbiu.so
+SCU= biu_vector.cu
 
 CC=gcc
 CPP=g++
@@ -20,6 +20,7 @@ NVCC=nvcc
 
 $(SLIB): $(SCU)
 	$(NVCC) $(COMMON) -shared -c $< -o $@
+	sudo chmod a+x $(SLIB)
 
 $(EXEC): $(EXECOBJ)
 	$(CPP) $(COMMON) $^ -o $@ $(LDFLAGS) 
