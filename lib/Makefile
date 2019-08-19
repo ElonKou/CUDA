@@ -20,10 +20,10 @@ NVCC=nvcc
 
 $(SLIB): $(SCU)
 	$(NVCC) $(COMMON) -shared -c $< -o $@
-	sudo chmod a+x $(SLIB)
+	chmod a+x $(SLIB)
 
 $(EXEC): $(EXECOBJ)
-	$(CPP) $(COMMON) $^ -o $@ $(LDFLAGS) 
+	$(CPP) -arch=sm_61 $(COMMON) $^ -o $@ $(LDFLAGS) 
 
 all:$(EXEC) $(SLIB)
 
