@@ -1,58 +1,58 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+/*================================================================
+*  Copyright (C)2020 All rights reserved.
+*  FileName : 00.add.cu
+*  Author   : maxsense
+*  Email    : elonkou@ktime.cc
+*  Date     : 2020年03月18日 星期三 10时48分48秒
+================================================================*/
 
-__global__ void add(float* x, float* y, float* z, int n) {
-    int index = threadIdx.x + blockIdx.x * blockDim.x;
-    // int stride = blockDim.x * gridDim.x;
-    // printf("index:%d, stride:%d\n", index, stride);
-    z[index] = x[index] + y[index];
+#include <cuda_runtime.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+template<typename T>
+__global__ void cuda_add(T *a, T *b, T *c){
+    size_t index = threadIdx.x + blockIdx.x * blockDim.x;
+    c[index] = a[index] + b[index];
 }
 
-int main() {
-    int N = 16;
-    int nBytes = N * sizeof(float);
-    float *x, *y, *z;
-    x = (float*)malloc(nBytes);
-    y = (float*)malloc(nBytes);
-    z = (float*)malloc(nBytes);
+template<typename T>
+vector<T> add(vector<T> a, vector<T> b){
+    T*d_a, *d_b, *d_c;
+    assert(a.size() == b.size());
+    size_t NBytes = a.size() * sizeof(T);
+    vector<T> res;
+    res.resize(a.size());
+    cudaMalloc((void **)&d_a, NBytes);
+    cudaMalloc((void **)&d_b, NBytes);
+    cudaMalloc((void **)&d_c, NBytes);
+    cudaMemcpy((void *)d_a, (void *)a.data(), NBytes, cudaMemcpyHostToDevice);
+    cudaMemcpy((void *)d_b, (void *)b.data(), NBytes, cudaMemcpyHostToDevice);
+    dim3 blocksPerGrid(a.size() / 32);
+    dim3 threadsPerBlock(32);
+    cuda_add<float><<<blocksPerGrid, threadsPerBlock>>>(d_a, d_b, d_c);
+    cudaMemcpy((void *)res.data(), (void *)d_c, NBytes, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_c);
+    return res;
+}
 
-    for (int i = 0; i < N; ++i) {
-        x[i] = 10.0 * i;
-        y[i] = 20.0 * i;
+int main(int argc, char *argv[]){
+    size_t N  = 64;
+    vector<float> a, b, c;
+    for(size_t i = 0;i < N; i++){
+        a.push_back(i * 1.0);
+        b.push_back(i * 2.1 - 5.3);
     }
-
-    // 申请device内存
-    float *d_x, *d_y, *d_z;
-    cudaMalloc((void**)&d_x, nBytes);
-    cudaMalloc((void**)&d_y, nBytes);
-    cudaMalloc((void**)&d_z, nBytes);
-
-    // 将host数据拷贝到device
-    cudaMemcpy((void*)d_x, (void*)x, nBytes, cudaMemcpyHostToDevice);
-    cudaMemcpy((void*)d_y, (void*)y, nBytes, cudaMemcpyHostToDevice);
-    // 定义kernel的执行配置
-    dim3 blockSize(N);
-    dim3 gridSize((N + blockSize.x - 1) / blockSize.x);
-    // 执行kernel
-    add<<<gridSize, blockSize>>>(d_x, d_y, d_z, N);
-
-    // 将device得到的结果拷贝到host
-    cudaMemcpy((void*)z, (void*)d_z, nBytes, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < N; i++) {
-        printf("%f ", z[i]);
+    c = add<float>(a, b);
+    for(size_t i = 0;i < N; i++){
+        cout << c[i] << " ";
     }
-    printf("\n");
-
-    // 释放device内存
-    cudaFree(d_x);
-    cudaFree(d_y);
-    cudaFree(d_z);
-    // 释放host内存
-    free(x);
-    free(y);
-    free(z);
-
     return 0;
 }

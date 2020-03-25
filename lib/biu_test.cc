@@ -2,7 +2,7 @@
 *  Copyright (C)2019 All rights reserved.
 *  FileName : biu_test.cc
 *  Author   : ElonKou
-*  Email    : elonkou@ktime.cc
+*  Email    : koudongliang@maxsense.ai
 *  Date     : 2019年08月17日 星期六 17时43分25秒
 ================================================================*/
 

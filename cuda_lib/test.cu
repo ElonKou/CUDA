@@ -1,0 +1,26 @@
+/*================================================================
+*  Copyright (C)2020 All rights reserved.
+*  FileName : test.cu
+*  Author   : maxsense
+*  Email    : koudongliang@maxsense.ai
+*  Date     : Wed 25 Mar 2020 10:17:02 AM CST
+================================================================*/
+
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <stdio.h>
+
+int main()
+{
+    const unsigned int N = 1048576;
+    const unsigned int bytes = N * sizeof(int);
+    int *h_a = (int*)malloc(bytes);
+    int *d_a;
+    cudaMalloc((int**)&d_a, bytes);
+
+    memset(h_a, 0, bytes);
+    cudaMemcpy(d_a, h_a, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(h_a, d_a, bytes, cudaMemcpyDeviceToHost);
+
+    return 0;
+}

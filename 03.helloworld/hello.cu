@@ -8,6 +8,6 @@ __global__ void helloCUDA(float f)
 int main()
 {
     helloCUDA<<<1, 5>>>(1.2345f);
-    cudaDeviceSynchronize();
+    cudaDeviceReset();
     return 0;
 }
