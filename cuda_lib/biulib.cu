@@ -20,57 +20,6 @@ __global__ void cuda_add(T* a, T* b, T* c) {
     c[index]     = a[index] + b[index];
 }
 
-// template <typename T>
-// __global__ void cuda_conv_2d(T* ori, T* kernal, T* res, int ori_w, int ori_h, int ker_w, int ker_h, int stride, bool padding, T padding_num) {
-//     int idx           = threadIdx.x + blockDim.x * blockIdx.x;
-//     int idy           = threadIdx.y + blockDim.y * blockIdx.y;
-//     int width_repeat  = 0;
-//     int height_repeat = 0;
-//     if (padding) {
-//         width_repeat  = (ori_w + blockDim.x - 1) / (blockDim.x * stride);
-//         height_repeat = (ori_h + blockDim.y - 1) / (blockDim.y * stride);
-//     }
-//     // printf("%d,%d ", width_repeat, height_repeat);
-//     for (int j = 0; j < height_repeat; ++j) {
-//         for (int i = 0; i < width_repeat; ++i) {
-//             int x = (i * 32 + idx);
-//             int y = (j * 32 + idy);
-//             if (x < ori_w && y < ori_h) {
-//                 int r_id  = x + y * ori_w;
-//                 res[r_id] = (T)0;
-//                 int k_x   = 0;
-//                 int k_y   = 0;
-//                 int o_id  = 0;
-
-//                 k_x  = x;
-//                 k_y  = y - 1;
-//                 o_id = k_x + k_y * ori_w;
-//                 if (k_x >= 0 && k_x < ori_w && k_y >= 0 && k_y < ori_h) {
-//                     res[r_id] += ori[o_id] * kernal[1];
-//                 }
-//                 k_x  = x - 1;
-//                 k_y  = y;
-//                 o_id = k_x + k_y * ori_w;
-//                 if (k_x >= 0 && k_x < ori_w && k_y >= 0 && k_y < ori_h) {
-//                     res[r_id] += ori[o_id] * kernal[3];
-//                 }
-//                 k_x  = x + 1;
-//                 k_y  = y;
-//                 o_id = k_x + k_y * ori_w;
-//                 if (k_x >= 0 && k_x < ori_w && k_y >= 0 && k_y < ori_h) {
-//                     res[r_id] += ori[o_id] * kernal[5];
-//                 }
-//                 k_x  = x;
-//                 k_y  = y + 1;
-//                 o_id = k_x + k_y * ori_w;
-//                 if (k_x >= 0 && k_x < ori_w && k_y >= 0 && k_y < ori_h) {
-//                     res[r_id] += ori[o_id] * kernal[7];
-//                 }
-//             }
-//         }
-//     }
-// }
-
 template <typename T>
 __global__ void cuda_conv_2d(T* ori, T* kernal, T* res, int ori_w, int ori_h, int ker_w, int ker_h, int stride, bool padding, T padding_num) {
     int idx           = threadIdx.x + blockDim.x * blockIdx.x;
@@ -84,30 +33,81 @@ __global__ void cuda_conv_2d(T* ori, T* kernal, T* res, int ori_w, int ori_h, in
     // printf("%d,%d ", width_repeat, height_repeat);
     for (int j = 0; j < height_repeat; ++j) {
         for (int i = 0; i < width_repeat; ++i) {
-            int x = (i * blockDim.x + idx) * stride;
-            int y = (j * blockDim.y + idy) * stride;
+            int x = (i * 32 + idx);
+            int y = (j * 32 + idy);
             if (x < ori_w && y < ori_h) {
-                // printf("%d,%d ", x, y);
                 int r_id  = x + y * ori_w;
                 res[r_id] = (T)0;
-                for (int kj = 0; kj < ker_h; ++kj) {
-                    for (int ki = 0; ki < ker_w; ++ki) {
-                        int k_x = x + (ki - ker_w / 2) * stride;
-                        int k_y = y + (kj - ker_h / 2) * stride;
-                        // printf("%d,%d ", k_x, k_y);
-                        int o_id = k_x + k_y * ori_w;
-                        int k_id = ki + kj * ker_w;
-                        if (k_x < 0 || k_x >= ori_w || k_y < 0 || k_y >= ori_h) {
-                            res[r_id] += padding_num * kernal[k_id];
-                        } else {
-                            res[r_id] += ori[o_id] * kernal[k_id];
-                        }
-                    }
+                int k_x   = 0;
+                int k_y   = 0;
+                int o_id  = 0;
+
+                k_x  = x;
+                k_y  = y - 1;
+                o_id = k_x + k_y * ori_w;
+                if (k_x >= 0 && k_x < ori_w && k_y >= 0 && k_y < ori_h) {
+                    res[r_id] += ori[o_id] * kernal[1];
+                }
+                k_x  = x - 1;
+                k_y  = y;
+                o_id = k_x + k_y * ori_w;
+                if (k_x >= 0 && k_x < ori_w && k_y >= 0 && k_y < ori_h) {
+                    res[r_id] += ori[o_id] * kernal[3];
+                }
+                k_x  = x + 1;
+                k_y  = y;
+                o_id = k_x + k_y * ori_w;
+                if (k_x >= 0 && k_x < ori_w && k_y >= 0 && k_y < ori_h) {
+                    res[r_id] += ori[o_id] * kernal[5];
+                }
+                k_x  = x;
+                k_y  = y + 1;
+                o_id = k_x + k_y * ori_w;
+                if (k_x >= 0 && k_x < ori_w && k_y >= 0 && k_y < ori_h) {
+                    res[r_id] += ori[o_id] * kernal[7];
                 }
             }
         }
     }
 }
+
+// template <typename T>
+// __global__ void cuda_conv_2d(T* ori, T* kernal, T* res, int ori_w, int ori_h, int ker_w, int ker_h, int stride, bool padding, T padding_num) {
+//     int idx           = threadIdx.x + blockDim.x * blockIdx.x;
+//     int idy           = threadIdx.y + blockDim.y * blockIdx.y;
+//     int width_repeat  = 0;
+//     int height_repeat = 0;
+//     if (padding) {
+//         width_repeat  = (ori_w + blockDim.x - 1) / (blockDim.x * stride);
+//         height_repeat = (ori_h + blockDim.y - 1) / (blockDim.y * stride);
+//     }
+//     // printf("%d,%d ", width_repeat, height_repeat);
+//     for (int j = 0; j < height_repeat; ++j) {
+//         for (int i = 0; i < width_repeat; ++i) {
+//             int x = (i * blockDim.x + idx) * stride;
+//             int y = (j * blockDim.y + idy) * stride;
+//             if (x < ori_w && y < ori_h) {
+//                 // printf("%d,%d ", x, y);
+//                 int r_id  = x + y * ori_w;
+//                 res[r_id] = (T)0;
+//                 for (int kj = 0; kj < ker_h; ++kj) {
+//                     for (int ki = 0; ki < ker_w; ++ki) {
+//                         int k_x = x + (ki - ker_w / 2) * stride;
+//                         int k_y = y + (kj - ker_h / 2) * stride;
+//                         // printf("%d,%d ", k_x, k_y);
+//                         int o_id = k_x + k_y * ori_w;
+//                         int k_id = ki + kj * ker_w;
+//                         if (k_x < 0 || k_x >= ori_w || k_y < 0 || k_y >= ori_h) {
+//                             res[r_id] += padding_num * kernal[k_id];
+//                         } else {
+//                             res[r_id] += ori[o_id] * kernal[k_id];
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
 Mat<float> conv_2d(Mat<float> a, Mat<float> b, int stride, bool padding, float padding_num) {
     float *    d_a, *d_b, *d_c;

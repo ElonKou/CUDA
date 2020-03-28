@@ -12,15 +12,16 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    cv::Mat xx = cv::imread("../image/test_2.png");
+    cv::Mat xx = cv::imread("../image/test.png");
     cv::Mat grey;
     cv::cvtColor(xx, grey, CV_BGR2GRAY);
     Mat<unsigned char> a = cv2Mat(grey);
     Mat<unsigned char> b(Dim(3, 3));
     Mat<unsigned char> c(a.dim);
-    b.Random();
-    c  = conv_2d(a, b, 1, true, 0);
-    xx = Mat2cv(c);
+    // b.Random();
+    b.data[1] = b.data[3] = b.data[4] = b.data[5] = b.data[7] = 1;
+    c                                                         = conv_2d(a, b, 1, true, 0);
+    xx                                                        = Mat2cv(c);
     std::cout << b << std::endl;
     cv::imshow("image", xx);
     cv::waitKey(0);
